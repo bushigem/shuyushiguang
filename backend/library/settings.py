@@ -12,21 +12,34 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from pathlib import Path
+from dotenv import load_dotenv # 导入 load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- 加载 .env 文件 ---
+# .env 文件应该位于 BASE_DIR (即 backend 目录)
+dotenv_path = BASE_DIR / '.env'
+load_dotenv(dotenv_path=dotenv_path)
+# --- 加载结束 ---
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%mp_h*k8)nk0@^bq0vumz6trld_5hvk%k7p5^g5-yopgou^mk='
+# 建议也将 SECRET_KEY 放入 .env 文件
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-if-not-in-env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# --- 添加 DeepSeek API Key 设置 ---
+# 从已加载的环境变量中读取 DEEPSEEK_API_KEY
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
+# --- 设置结束 ---
 
 # Application definition
 
@@ -73,9 +86,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+    # --- 移除或注释掉全局权限设置 ---
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ],
+    # --- 修改结束 ---
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],

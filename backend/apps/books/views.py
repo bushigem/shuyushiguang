@@ -17,6 +17,10 @@ from .models import Book
 from .serializers import BookSerializer
 import logging # 添加 logging 导入
 from rest_framework import permissions
+from openai import OpenAI # 确保导入 OpenAI
+import os # 确保导入 os
+from rest_framework.views import APIView # 导入 Django settings
+from django.conf import settings # 导入 Django settings
 
 # 检查是否有两个 BookViewSet 类定义
 # 如果有，需要删除一个，保留下面这个
@@ -138,27 +142,47 @@ class LocationViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'created_at']
 
 
-# --- 删除或注释掉这个重复的、权限为 IsAuthenticated 的 BookViewSet ---
-# class BookViewSet(viewsets.ModelViewSet):
-#     """书籍视图集"""
-#     queryset = Book.objects.all()
-#     serializer_class = BookSerializer
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-#     filterset_fields = ['status', 'category', 'location']
-#     search_fields = ['title', 'isbn', 'author', 'publisher', 'description']
-#     ordering_fields = ['title', 'author', 'publisher', 'publish_date', 'added_at']
-#
-#     def get_serializer_class(self):
-#         if self.action == 'retrieve':
-#             return BookDetailSerializer
-#         return BookSerializer
-#
-#     @action(detail=False, methods=['post'])
-#     def bulk_add(self, request):
-#         # ...
-#
-#     @action(detail=False, methods=['delete'])
-#     def bulk_delete(self, request):
-#         # ...
-# --- 结束删除 ---
+# --- DeepSeekChatView (确保存在且正确) ---
+class DeepSeekChatView(APIView): # 依赖于上面的导入
+    """
+    处理与 DeepSeek API 的聊天交互
+    """
+    permission_classes = [AllowAny] # 聊天接口允许匿名访问
+
+    def post(self, request, *args, **kwargs):
+        user_message = request.data.get('message')
+        if not user_message:
+            return Response({"error": "消息不能为空"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- 从 Django settings 获取 API Key ---
+        api_key = settings.DEEPSEEK_API_KEY # <--- 修改这里，从 settings 读取
+        if not api_key: # <--- 检查从 settings 获取的值
+             logger.error("DeepSeek API Key 未在 Django settings 或 .env 文件中配置")
+             # 返回 500 错误
+             return Response({"error": "AI 服务配置错误"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # --- 获取结束 ---
+
+        try:
+            # 使用从 settings 获取的 api_key
+            client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
+            response = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": "你是一个乐于助人的助手。"},
+                    {"role": "user", "content": user_message},
+                ],
+                stream=False
+            )
+
+            ai_response = response.choices[0].message.content
+            return Response({"reply": ai_response}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"调用 DeepSeek API 时出错: {e}", exc_info=True)
+            # 其他异常也会导致 500 错误
+            return Response({"error": f"与 AI 服务通信时发生错误"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# --- 确认没有其他重复的 BookViewSet 定义 ---
+# (如果之前有注释掉的重复 BookViewSet，请确保它已被删除)
