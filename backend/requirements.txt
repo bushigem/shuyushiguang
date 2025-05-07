@@ -6,3 +6,4 @@ Pillow>=10.0.0  # 用于处理图片
 pandas>=2.0.0
 openpyxl>=3.1.0
 openai>=1.0.0 # 添加 openai 库
+django-jazzmin==3.0.1 # 由 2.7.0 修改为此版本
