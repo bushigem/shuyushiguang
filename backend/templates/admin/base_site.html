@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Django 管理</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+<ul class="nav-global">
+    <li><a href="{% url 'admin-dashboard' %}">今日数据</a></li> <!-- 添加导航按钮 -->
+</ul>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+# 确保导入 Group 和 Permission
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
@@ -101,12 +102,36 @@ class User(AbstractBaseUser, PermissionsMixin):
         auto_now=True,
         verbose_name=_('更新时间')
     )
-    
+
+    # --- 添加以下字段定义以解决 related_name 冲突 ---
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=_('groups'),
+        blank=True,
+        help_text=_(
+            'The groups this user belongs to. A user will get all permissions '
+            'granted to each of their groups.'
+        ),
+        # 指定唯一的 related_name
+        related_name="library_user_groups",
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('user permissions'),
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        # 指定唯一的 related_name
+        related_name="library_user_permissions",
+        related_query_name="user",
+    )
+    # --- 添加结束 ---
+
     objects = UserManager()
-    
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['name']
-    
+
     class Meta:
         verbose_name = _('用户')
         verbose_name_plural = verbose_name

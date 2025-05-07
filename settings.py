@@ -1,6 +1,6 @@
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
+    # 'django.contrib.auth',  # 注释掉认证应用
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -18,7 +18,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',  # 暂时注释掉CSRF中间件
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',  # 注释掉认证中间件
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -128,6 +128,31 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
+}
+
+# SimpleUI 配置
+SIMPLEUI_CONFIG = {
+    'system_keep': False,  # 关闭系统菜单
+    'menu_display': ['图书管理'],  # 只显示图书管理菜单
+    'dynamic': True,  # 开启动态菜单功能
+    'menus': [
+        {
+            'name': '图书管理',
+            'icon': 'fas fa-book',
+            'models': [
+                {
+                    'name': '图书列表',
+                    'url': '/admin/books/book/',
+                    'icon': 'fas fa-list'
+                },
+                {
+                    'name': '分类管理',
+                    'url': '/admin/books/category/',
+                    'icon': 'fas fa-tags'
+                }
+            ]
+        }
+    ]
 }
 
 # LOGGING 设置 (保持之前的设置)

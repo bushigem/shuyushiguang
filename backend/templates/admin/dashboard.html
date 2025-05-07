@@ -1,0 +1,59 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>{{ title }}</h1>
+    <button class="toggle-button" onclick="toggleTodayData()">今日数据</button>
+    <div id="todayData" class="data-container">
+        <div class="chart-section">
+            <h2>书籍类型数量</h2>
+            <canvas id="bookChart"></canvas>
+            {{ book_categories|json_script:"bookCategories" }}
+            {{ book_data_points|json_script:"bookDataPoints" }}
+        </div>
+        <div class="active-users-section">
+            <h2>今日活跃用户</h2>
+            <p>{{ active_users_today }} 人</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let bookChartInstance = null;
+
+    function toggleTodayData() {
+        const todayDataDiv = document.getElementById('todayData');
+        const isCurrentlyHidden = todayDataDiv.style.display === 'none' || !todayDataDiv.style.display;
+        if (isCurrentlyHidden) {
+            todayDataDiv.style.display = 'block';
+            if (!bookChartInstance) {
+                const bookCategoriesData = JSON.parse(document.getElementById('bookCategories').textContent);
+                const bookDataPointsData = JSON.parse(document.getElementById('bookDataPoints').textContent);
+                const ctx = document.getElementById('bookChart').getContext('2d');
+                bookChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: bookCategoriesData,
+                        datasets: [{
+                            label: '书籍数量',
+                            data: bookDataPointsData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            todayDataDiv.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

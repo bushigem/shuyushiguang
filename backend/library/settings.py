@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-from pathlib import Path
 from dotenv import load_dotenv # 导入 load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,19 +44,20 @@ DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 
 # 在 INSTALLED_APPS 中添加应用
 INSTALLED_APPS = [
-    'simpleui',
+    'jazzmin', # <--- 添加 jazzmin
+    # 'grappelli', # <--- 移除或注释掉 grappelli
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # 第三方应用
     'rest_framework',
     'django_filters',
     'corsheaders',
-      # 添加simpleui
+    # 添加simpleui  <-- 如果之前是simpleui，也应移除或注释
 
     # 自定义应用
     'apps.users',
@@ -77,6 +77,28 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ROOT_URLCONF = 'library.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],  # 确保包含自定义模板目录
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'library.wsgi.application'
+
 # 自定义用户模型
 AUTH_USER_MODEL = 'users.User'
 
@@ -86,11 +108,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
-    # --- 移除或注释掉全局权限设置 ---
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
-    # --- 修改结束 ---
+    
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
@@ -104,95 +122,188 @@ CORS_ALLOW_ALL_ORIGINS = True  # 开发环境下允许所有来源
 # 国际化设置
 LANGUAGE_CODE = 'zh-hans'
 TIME_ZONE = 'Asia/Shanghai'
+USE_I18N = True
+USE_TZ = True
 
 # 媒体文件设置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # 静态文件设置
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
-
-ROOT_URLCONF = 'library.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # 确保这行存在
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
 ]
 
-WSGI_APPLICATION = 'library.wsgi.application'
+# SimpleUI设置
+# 移除或注释掉所有 SimpleUI 设置
+# SIMPLEUI_HOME_TITLE = '书语时光管理系统'
+# SIMPLEUI_STATIC_OFFLINE = True
+# SIMPLEUI_DEFAULT_THEME = 'default'
+# SIMPLEUI_ANALYSIS = False
+# SIMPLEUI_LOADING = False
+# SIMPLEUI_CONFIG = {
+#     'system_keep': False,
+#     'menu_display': ['书籍管理', '借阅管理', '用户管理'],
+#     'dynamic': False,
+#     'menus': []
+# }
+# SIMPLEUI_LOGO = '...'
+# SIMPLEUI_STATIC_OFFLINE = True  # <--- 移除这一行重复的设置
 
+# JAZZMIN_SETTINGS (如果已存在，请合并；如果不存在，请添加)
+JAZZMIN_SETTINGS = {
+    # 网站标题，在登录页面和浏览器标签页显示
+    "site_title": "书语时光管理后台",
+
+    # 顶部栏 Logo
+    "site_header": "书语时光",
+
+    # 网站 Logo，显示在侧边栏顶部 (可以是相对路径，指向 static 文件夹中的文件)
+    # "site_logo": "books/img/logo.png",
+
+    # 登录页面 Logo
+    # "login_logo": None,
+
+    # 版权信息
+    "copyright": "书语时光 Ltd",
+
+    # 欢迎语
+    "welcome_sign": "欢迎登录书语时光管理后台",
+
+    # 搜索模型 (可以指定多个)
+    "search_model": ["auth.User", "books.Book"],
+
+    # 要在侧边栏顶部显示的自定义链接
+    "topmenu_links": [
+        # 指向 admin:index 的 URL
+        {"name": "首页", "url": "admin:index", "permissions": ["auth.view_user"]},
+        # 外部链接，在新窗口打开
+        # {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        # 模型管理链接
+        {"model": "auth.User"},
+    ],
+
+    # 自定义侧边栏链接
+    # "custom_links": {
+    #     "books": [ # "books" 是一个应用的 app_label，链接会显示在该应用下
+    #         {
+    #             "name": "Make Messages",
+    #             "url": "make_messages",
+    #             "icon": "fas fa-comments",
+    #             "permissions": ["books.view_book"]
+    #         }
+    #     ]
+    # },
+
+    # 直接添加到侧边栏的自定义链接 (推荐用于“今日数据”)
+    # 侧边栏自定义链接（此处注释掉 sidebar_custom_links）
+    # "sidebar_custom_links": [
+    #     {"name": "今日数据", "url": "admin-dashboard", "icon": "fas fa-tachometer-alt"},
+    # ],
+    # 应用下的自定义链接
+    "custom_links": {
+        "books": [ # 或者您希望它出现的其他 app_label
+            {
+                "name": "今日数据",
+                "url": "admin:admin_dashboard",  # <--- 使用命名空间 admin 和您在 admin.py 中定义的 name
+                "icon": "fas fa-tachometer-alt",
+                # "permissions": ["books.view_book"], # 可选
+            }
+        ]
+        # 如果想显示在“借阅记录”下，改为 "borrowing": [...]
+    },
+
+    # 图标集 (Font Awesome 5)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "books.Book": "fas fa-book",
+        "borrowing.BorrowRecord": "fas fa-exchange-alt",
+        "users.User": "fas fa-user-friends", # 假设您的自定义用户应用名为 users
+    },
+    # 默认图标，如果模型没有指定图标
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    #################
+    # UI Customizer #
+    #################
+    # Jazzmin UI 定制器启用/禁用，允许用户在界面上更改主题选项
+    "show_ui_builder": False, # 通常在生产中设为 False
+
+    "changeform_format": "horizontal_tabs",
+    # "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+}
+# JAZZMIN_UI_TWEAKS (如果需要更细致的调整，但 JAZZMIN_SETTINGS 通常足够)
+# JAZZMIN_UI_TWEAKS = {
+#     "navbar_small_text": False,
+#     "footer_small_text": False,
+#     "body_small_text": True,
+#     "brand_small_text": False,
+#     "brand_colour": "navbar-indigo", # 例如 navbar-primary, navbar-secondary, navbar-success 等
+#     "accent": "accent-primary",
+#     "navbar": "navbar-white navbar-light",
+#     "no_navbar_border": False,
+#     "navbar_fixed": True,
+#     "layout_boxed": False,
+#     "footer_fixed": False,
+#     "sidebar_fixed": True,
+#     "sidebar": "sidebar-dark-indigo", # 例如 sidebar-dark-primary, sidebar-light-indigo
+#     "sidebar_nav_small_text": False,
+#     "sidebar_disable_expand": False,
+#     "sidebar_nav_child_indent": False,
+#     "sidebar_nav_compact_style": False,
+#     "sidebar_nav_legacy_style": False,
+#     "sidebar_nav_flat_style": False,
+#     "theme": "default", # "default", "cerulean", "cosmo", "cyborg", "darkly", "flatly", "journal", "litera", "lumen", "lux", "materia", "minty", "pulse", "sandstone", "simplex", "sketchy", "slate", "solar", "spacelab", "superhero", "united", "yeti"
+#     "dark_mode_theme": None, # 如果设置了，暗黑模式下会使用这个主题
+#     "button_classes": {
+#         "primary": "btn-primary",
+#         "secondary": "btn-secondary",
+#         "info": "btn-info",
+#         "warning": "btn-warning",
+#         "danger": "btn-danger",
+#         "success": "btn-success"
+#     }
+# }
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# settings.py
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'library_management_system', # ! 重要: 修改为你在 Adminer 中实际使用的数据库名称
+        'NAME': 'library_management_system',
         'USER': 'root',
-        'PASSWORD': '123456',               # ! 警告: 生产环境强烈建议使用环境变量存储密码！
-        'HOST': 'localhost',              # 或 'localhost' - Django 在宿主机, 连接宿主机的 IP
-        'PORT': '3307',                   # ! 重要: 使用 Docker 端口映射中暴露到宿主机的端口 (根据截图是 3307)
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '3307',
         'OPTIONS': {
-            'charset': 'utf8mb4',         # 推荐设置字符集
-            # 根据需要保留或移除以下选项:
+            'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'connect_timeout': 180,
         }
     }
-}          
+}
 
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django_debug.log',
+        },
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',  # 将日志级别设置为 WARNING 或 ERROR
+        },
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+}
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,0 +1,8 @@
+Django
+djangorestframework
+django-filter
+django-cors-headers
+python-dotenv
+mysqlclient
+simpleui
+# 如果您使用了其他库，请在此处添加

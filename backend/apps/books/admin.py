@@ -4,6 +4,7 @@ from django.urls import path
 from django.shortcuts import render
 from .models import Book, Category, Location
 from .forms import BookImportForm
+from .admin_views import dashboard # <--- 导入 dashboard 视图
 
 # 先注册分类模型
 @admin.register(Category)
@@ -58,3 +59,22 @@ class BookAdmin(admin.ModelAdmin):
         else:
             form = BookImportForm()
         return render(request, 'admin/books/book/import_books.html', {'form': form})
+
+# --- 将 dashboard 视图注册到 admin.site ---
+# 获取 Django Admin Site 的默认 get_urls 方法
+original_get_urls = admin.site.get_urls
+
+def get_admin_site_urls():
+    # 先获取所有默认的 admin URLs
+    urls = original_get_urls()
+    # 然后添加您的自定义 URL
+    # 注意：这里的 path 是相对于 /admin/ 的，所以 'dashboard/' 对应 /admin/dashboard/
+    # name='admin_dashboard' 将在 admin 命名空间下，所以完整名称是 admin:admin_dashboard
+    custom_urls = [
+        path('dashboard/', admin.site.admin_view(dashboard), name='admin_dashboard')
+    ]
+    return custom_urls + urls
+
+# 使用我们修改后的 get_urls 方法替换掉原来的
+admin.site.get_urls = get_admin_site_urls
+# --- dashboard 注册结束
